@@ -1,0 +1,62 @@
+info:
+  contact: {}
+paths:
+  /api/v1/images:
+    get:
+      consumes:
+      - application/json
+      description: List all ISO images available.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: dict
+      summary: List ISO images
+      tags:
+      - Images
+  /api/v1/images/{name}:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Delete an image.
+      tags:
+      - Images
+    get:
+      consumes:
+      - application/json
+      description: Get an ISO image.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: stream
+      summary: Get ISO image.
+      tags:
+      - Images
+  /api/v1/status:
+    get:
+      consumes:
+      - application/json
+      description: API status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: dict
+      summary: Get API status
+      tags:
+      - Status
+swagger: "2.0"
