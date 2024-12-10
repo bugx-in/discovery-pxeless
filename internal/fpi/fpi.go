@@ -31,7 +31,7 @@ type DiscoveryImage struct {
 
 // Wrap structure to adding default values.
 func NewDiscoveryImage() (*DiscoveryImage) {
-	return DiscoveryImage{
+	return &DiscoveryImage{
 		CountDown: "5",
 		PxAuto: "1",
 		Ssh: "1",
