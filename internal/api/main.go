@@ -13,18 +13,13 @@ import (
 
 var imagesPath string = os.Getenv("IMAGES_PATH")
 
-type Response struct {
-	result string
-}
-
 // Generates a discovery image with the customized data.
 // Puts the image available to download by the server.
 func generateDiscoveryImage(c *gin.Context) {
-	// Initizalize structure and define default values.
-	var discoveryImage fpi.DiscoveryImage
-	fpi.NewDiscoveryImage(&discoveryImage)
+	// Initialize discovery image.
+	discoveryImage := fpi.NewDiscoveryImage()
 
-	// Call BindJSON to bind the received JSON request and tranform it to a structure
+	// Call BindJSON to bind the received JSON request and tranform it to a structure.
 	if err := c.BindJSON(&discoveryImage); err != nil {
 
 		// Return error if data could not be serialized.
@@ -37,7 +32,6 @@ func generateDiscoveryImage(c *gin.Context) {
 	_, error := fpi.DiscoveryImageValidate(&discoveryImage)
 	if error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": error.Error()})
-		return
 	}
 
 	// Generate the discovery image.
@@ -59,7 +53,7 @@ func generateDiscoveryImage(c *gin.Context) {
 // @Produce json
 // @Success 200 {dict} Status of the API.
 // @Router /api/v1/status [get]
-func Status(c *gin.Context) {
+func status(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "Online"})
 }
 
@@ -74,7 +68,7 @@ func Status(c *gin.Context) {
 // @Produce json
 // @Success 200 {dict} Dictionary with the results.
 // @Router /api/v1/images [get]
-func ListImages(c *gin.Context) {
+func listImages(c *gin.Context) {
 	// Get all images.
 	isos := fpi.ListImages(imagesPath)
 
@@ -92,7 +86,7 @@ func ListImages(c *gin.Context) {
 // @Produce json
 // @Success 200 {stream} ISO image
 // @Router /api/v1/images/{name} [get]
-func GetImage(c *gin.Context) {
+func getImage(c *gin.Context) {
 	// Check if image exists.
 	if !fpi.ImageExist(c.Param("name"), imagesPath) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Image does not exist: " + c.Param("name")})
@@ -100,8 +94,6 @@ func GetImage(c *gin.Context) {
 
 	// Return the image.
 	c.FileAttachment(imagesPath+"/"+c.Param("name"), c.Param("name"))
-	return
-
 }
 
 // Delete and image.
@@ -110,9 +102,9 @@ func GetImage(c *gin.Context) {
 // @Tags Images
 // @Accept json
 // @Produce json
-// @Success 200 {string} Response
+// @Success 200 {string}e
 // @Router /api/v1/images/{name} [delete]
-func DeleteImage(c *gin.Context) {
+func deleteImage(c *gin.Context) {
 	// Check if image exists.
 	if !fpi.ImageExist(c.Param("name"), imagesPath) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Image does not exist: " + c.Param("name")})
@@ -132,10 +124,10 @@ func Run() {
 	v1 := router.Group("/api/v1/")
 	{
 		v1.GET("/status", Status)
-		v1.GET("/images", ListImages)
-		v1.HEAD("/images/:name", GetImage)
-		v1.GET("/images/:name", GetImage)
-		v1.DELETE("/images/:name", DeleteImage)
+		v1.GET("/images", listImages)
+		v1.HEAD("/images/:name", getImage)
+		v1.GET("/images/:name", getImage)
+		v1.DELETE("/images/:name", deleteImage)
 		v1.POST("/generate", generateDiscoveryImage)
 	}
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

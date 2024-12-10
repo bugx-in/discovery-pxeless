@@ -18,6 +18,4 @@ func main() {
 	}
 
 	api.Run()
-
-	return
 }

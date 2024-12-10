@@ -30,13 +30,13 @@ type DiscoveryImage struct {
 }
 
 // Wrap structure to adding default values.
-func NewDiscoveryImage(d *DiscoveryImage) (*DiscoveryImage, error) {
-	// Set default values
-	d.CountDown = "5"
-	d.PxAuto = "1"
-	d.Ssh = "1"
-	d.RootPw = "discovery_admin"
-	return d, nil
+func NewDiscoveryImage() (*DiscoveryImage) {
+	return DiscoveryImage{
+		CountDown: "5",
+		PxAuto: "1",
+		Ssh: "1",
+		RootPw: "discovery_admin"
+	}
 }
 
 func DiscoveryImageValidate(d *DiscoveryImage) (string, error) {
