@@ -123,7 +123,7 @@ func Run() {
 	// V1 version.
 	v1 := router.Group("/api/v1/")
 	{
-		v1.GET("/status", Status)
+		v1.GET("/status", status)
 		v1.GET("/images", listImages)
 		v1.HEAD("/images/:name", getImage)
 		v1.GET("/images/:name", getImage)

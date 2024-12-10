@@ -35,7 +35,7 @@ func NewDiscoveryImage() (*DiscoveryImage) {
 		CountDown: "5",
 		PxAuto: "1",
 		Ssh: "1",
-		RootPw: "discovery_admin"
+		RootPw: "discovery_admin",
 	}
 }
 
