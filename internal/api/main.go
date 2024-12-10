@@ -1,14 +1,14 @@
 package api
 
 import (
+	"fpi/internal/docs"
 	"fpi/internal/fpi"
-	"github.com/rs/zerolog/log"
-	"net/http"
-	"os"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
-    "fpi/internal/docs"
+	"net/http"
+	"os"
 )
 
 var imagesPath string = os.Getenv("IMAGES_PATH")
@@ -21,33 +21,32 @@ type Response struct {
 // Puts the image available to download by the server.
 func generateDiscoveryImage(c *gin.Context) {
 	// Initizalize structure and define default values.
-    var discoveryImage fpi.DiscoveryImage
+	var discoveryImage fpi.DiscoveryImage
 	fpi.NewDiscoveryImage(&discoveryImage)
 
 	// Call BindJSON to bind the received JSON request and tranform it to a structure
-    if err := c.BindJSON(&discoveryImage); err != nil {
+	if err := c.BindJSON(&discoveryImage); err != nil {
 
 		// Return error if data could not be serialized.
 		log.Error().Msgf("Received data could not be serialized: %s", err.Error())
-        c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
-		return
-    }
-
-    // Validate some requirements.
-	_, error := fpi.DiscoveryImageValidate(&discoveryImage)
-	if error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error":  error.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
 		return
 	}
 
-    // Generate the discovery image.
+	// Validate some requirements.
+	_, error := fpi.DiscoveryImageValidate(&discoveryImage)
+	if error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": error.Error()})
+		return
+	}
+
+	// Generate the discovery image.
 	result := fpi.GenerateDiscoveryImage(&discoveryImage, imagesPath)
 
-    log.Debug().Msg(result)
+	log.Debug().Msg(result)
 
-    c.JSON(http.StatusOK, gin.H{"result": "Image will be ready in 2 minutes."})
+	c.JSON(http.StatusOK, gin.H{"result": "Image will be ready in 2 minutes."})
 }
-
 
 // Get API status
 // @BasePath /api/v1
@@ -93,14 +92,14 @@ func ListImages(c *gin.Context) {
 // @Produce json
 // @Success 200 {stream} ISO image
 // @Router /api/v1/images/{name} [get]
-func GetImage(c *gin.Context)  {
+func GetImage(c *gin.Context) {
 	// Check if image exists.
 	if !fpi.ImageExist(c.Param("name"), imagesPath) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Image does not exist: " + c.Param("name")}) 
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Image does not exist: " + c.Param("name")})
 	}
 
-    // Return the image.
-	c.FileAttachment(imagesPath + "/" + c.Param("name"), c.Param("name"))
+	// Return the image.
+	c.FileAttachment(imagesPath+"/"+c.Param("name"), c.Param("name"))
 	return
 
 }
@@ -116,13 +115,13 @@ func GetImage(c *gin.Context)  {
 func DeleteImage(c *gin.Context) {
 	// Check if image exists.
 	if !fpi.ImageExist(c.Param("name"), imagesPath) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Image does not exist: " + c.Param("name")}) 
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Image does not exist: " + c.Param("name")})
 	}
 
-    // Remove the image and reurn the result.
-    os.Remove(imagesPath + "/" + c.Param("name"))
+	// Remove the image and reurn the result.
+	os.Remove(imagesPath + "/" + c.Param("name"))
 	c.JSON(http.StatusOK, gin.H{"result": "Image deleted: " + c.Param("name")})
-    return
+	return
 }
 
 func Run() {
@@ -133,7 +132,7 @@ func Run() {
 	v1 := router.Group("/api/v1/")
 	{
 		v1.GET("/status", Status)
-		v1.GET("/images",  ListImages)
+		v1.GET("/images", ListImages)
 		v1.HEAD("/images/:name", GetImage)
 		v1.GET("/images/:name", GetImage)
 		v1.DELETE("/images/:name", DeleteImage)

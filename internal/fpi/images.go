@@ -1,10 +1,10 @@
 package fpi
 
 import (
-	"strings"
-	"slices"
-	"os"
 	"github.com/rs/zerolog/log"
+	"os"
+	"slices"
+	"strings"
 )
 
 func ImageExist(image string, imagesPath string) bool {
@@ -28,12 +28,12 @@ func ListImages(imagesPath string) []string {
 	if err != nil {
 		log.Warn().Msg(err.Error())
 		return isos
-    }
+	}
 
-    for _, file := range files {
+	for _, file := range files {
 		if !file.IsDir() {
-            isos = append(isos, file.Name())
+			isos = append(isos, file.Name())
 		}
-    }
+	}
 	return isos
 }
