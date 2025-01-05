@@ -25,7 +25,6 @@ func generateDiscoveryImage(c *gin.Context) {
 		// Return error if data could not be serialized.
 		log.Error().Msgf("Received data could not be serialized: %s", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
-		return
 	}
 
 	// Validate some requirements.
@@ -116,7 +115,7 @@ func deleteImage(c *gin.Context) {
 	return
 }
 
-func Run() {
+func Run() error {
 	router := gin.Default()
 	docs.SwaggerInfo.BasePath = "/api/v1/"
 
@@ -131,5 +130,5 @@ func Run() {
 		v1.POST("/generate", generateDiscoveryImage)
 	}
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	router.Run()
+	return router.Run()
 }

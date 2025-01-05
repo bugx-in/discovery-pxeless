@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fpi/api"
 	"github.com/rs/zerolog/log"
 	"os"
+	"fpi/api"
 )
 
 func main() {
@@ -17,5 +17,7 @@ func main() {
 		}
 	}
 
-	api.Run()
+	if err := api.Run(); err != nil {
+		log.Fatal().Msg(err.Error())
+	}
 }
