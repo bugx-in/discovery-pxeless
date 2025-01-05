@@ -1,8 +1,8 @@
 package api
 
 import (
-	"fpi/internal/docs"
-	"fpi/internal/fpi"
+	"fpi/api/docs"
+	"fpi/internal"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"github.com/swaggo/files"
@@ -29,13 +29,16 @@ func generateDiscoveryImage(c *gin.Context) {
 	}
 
 	// Validate some requirements.
-	_, error := fpi.DiscoveryImageValidate(&discoveryImage)
+	_, error := discoveryImage.ValidateImage()
 	if error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": error.Error()})
 	}
 
 	// Generate the discovery image.
-	result := fpi.GenerateDiscoveryImage(&discoveryImage, imagesPath)
+	result, err := discoveryImage.GenerateDiscoveryImage(imagesPath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": error.Error()})
+	}
 
 	log.Debug().Msg(result)
 
@@ -69,10 +72,9 @@ func status(c *gin.Context) {
 // @Success 200 {dict} Dictionary with the results.
 // @Router /api/v1/images [get]
 func listImages(c *gin.Context) {
-	// Get all images.
-	isos := fpi.ListImages(imagesPath)
+	images := fpi.NewImages(imagesPath)
 
-	c.JSON(http.StatusOK, gin.H{"results": isos})
+	c.JSON(http.StatusOK, gin.H{"results": images.ListImages()})
 }
 
 // Puts the ISO image on the stream for clients to download it.
@@ -87,8 +89,8 @@ func listImages(c *gin.Context) {
 // @Success 200 {stream} ISO image
 // @Router /api/v1/images/{name} [get]
 func getImage(c *gin.Context) {
-	// Check if image exists.
-	if !fpi.ImageExist(c.Param("name"), imagesPath) {
+	images := fpi.NewImages(imagesPath)
+	if !images.ImageExist(c.Param("name")) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Image does not exist: " + c.Param("name")})
 	}
 
@@ -105,13 +107,11 @@ func getImage(c *gin.Context) {
 // @Success 200 {string}e
 // @Router /api/v1/images/{name} [delete]
 func deleteImage(c *gin.Context) {
-	// Check if image exists.
-	if !fpi.ImageExist(c.Param("name"), imagesPath) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Image does not exist: " + c.Param("name")})
+	images := fpi.NewImages(imagesPath)
+	if err := images.DeleteImage(c.Param("name")); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	// Remove the image and reurn the result.
-	os.Remove(imagesPath + "/" + c.Param("name"))
 	c.JSON(http.StatusOK, gin.H{"result": "Image deleted: " + c.Param("name")})
 	return
 }

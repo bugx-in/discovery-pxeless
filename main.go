@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fpi/internal/api"
+	"fpi/api"
 	"github.com/rs/zerolog/log"
 	"os"
 )

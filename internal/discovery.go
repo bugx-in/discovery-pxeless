@@ -29,52 +29,40 @@ type DiscoveryImage struct {
 	Facts     []Fact `json:"facts"`
 }
 
-// Wrap structure to adding default values.
-func NewDiscoveryImage() (*DiscoveryImage) {
+// New discovery image struct with default values.
+func NewDiscoveryImage() *DiscoveryImage {
 	return &DiscoveryImage{
 		CountDown: "5",
-		PxAuto: "1",
-		Ssh: "1",
-		RootPw: "discovery_admin",
+		PxAuto:    "1",
+		Ssh:       "1",
+		RootPw:    "discovery_admin",
 	}
 }
 
-func DiscoveryImageValidate(d *DiscoveryImage) (string, error) {
+func (d *DiscoveryImage) ValidateImage() (string, error) {
 	// Validate FDQN.
 	if !strings.Contains(d.HostName, ".") {
 		log.Error().Msgf("Hostname is not a FQDN: %s", d.HostName)
 		return "", errors.New("hostname is not a FQDN")
 	}
-
 	return "", nil
 }
 
 // Execute a command.
-func executeCommand(wait bool, command string, args ...string) string {
+func executeCommand(args ...string) (string, error) {
 	// Prepare command.
-	cmd := exec.Command(command, args...)
+	cmd := exec.Command("bash -c", args...)
 
-	// If wait wait until command returns the result.
-	if wait {
-		output, err := cmd.Output()
-		if err != nil {
-			log.Error().Msgf("Error creating image: %s", err.Error())
-			return ""
-		}
-
-		return string(output)
-	}
-
-	// If not wait start the command and return.
+	// Do not wait.
 	if err := cmd.Start(); err != nil {
 		log.Error().Msgf("Error creating image: %s", err.Error())
-		return ""
+		return "", err
 	}
 
-	return "Command is being executed."
+	return "Command is being executed.", nil
 }
 
-// Convert facts list to string
+// Convert facts list to string.
 func formatFacts(f []Fact) string {
 	var facts string
 
@@ -88,7 +76,7 @@ func formatFacts(f []Fact) string {
 }
 
 // Generate a discovery image.
-func GenerateDiscoveryImage(d *DiscoveryImage, imagesPath string) string {
+func (d *DiscoveryImage) GenerateDiscoveryImage(imagesPath string) (string, error) {
 	// Get the remaster script and the ISO base image.
 	// The ISO base image will be remastered to add the host details.
 	remasterBin := os.Getenv("DISCOVERY_REMASTER")
@@ -116,5 +104,5 @@ func GenerateDiscoveryImage(d *DiscoveryImage, imagesPath string) string {
 	// Generate the image.
 	log.Debug().Msgf("Generatin ISO image with command: %s", cmd)
 
-	return executeCommand(false, "bash", "-c", cmd)
+	return executeCommand(cmd)
 }
