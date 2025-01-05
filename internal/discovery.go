@@ -50,8 +50,7 @@ func (d *DiscoveryImage) ValidateImage() (string, error) {
 
 // Execute a command.
 func executeCommand(args ...string) (string, error) {
-	// Prepare command.
-	//lint:ignore SA1005
+	//lint:ignore SA1005 We use bash command.
 	cmd := exec.Command("bash -c", args...)
 
 	// Do not wait.

@@ -112,7 +112,6 @@ func deleteImage(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"result": "Image deleted: " + c.Param("name")})
-	return
 }
 
 func Run() error {
