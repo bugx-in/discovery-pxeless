@@ -49,9 +49,8 @@ func (d *DiscoveryImage) ValidateImage() (string, error) {
 }
 
 // Execute a command.
-//lint:ignore SA1005 We use bash command.
-func executeCommand(args ...string) (string, error) {
-	cmd := exec.Command("bash -c", args...)
+func executeCommand(command string, args ...string) (string, error) {
+	cmd := exec.Command(command, args...)
 
 	// Do not wait.
 	if err := cmd.Start(); err != nil {
@@ -83,7 +82,7 @@ func (d *DiscoveryImage) GenerateDiscoveryImage(imagesPath string) (string, erro
 	discoveryBaseImage := os.Getenv("DISCOVERY_BASE_IMAGE")
 
 	// Generate the command to execute to create the image.
-	cmdOpts := []string{remasterBin,
+	cmdOpts := []string{
 		discoveryBaseImage,
 		"\"" +
 			"fdi.pxip=" + d.Ip + "/" + d.Cidr,
@@ -104,5 +103,5 @@ func (d *DiscoveryImage) GenerateDiscoveryImage(imagesPath string) (string, erro
 	// Generate the image.
 	log.Debug().Msgf("Generatin ISO image with command: %s", cmd)
 
-	return executeCommand(cmd)
+	return executeCommand(remasterBin, cmd)
 }
